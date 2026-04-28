@@ -1,0 +1,2217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia: Defeitos em Impressão 3D FDM</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --bg2: #171c27;
+    --bg3: #1e2535;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+    --text: #e8eaf0;
+    --text2: #9ba3b8;
+    --accent: #ff6b35;
+    --accent2: #ff9a5c;
+    --blue: #4a9eff;
+    --green: #3ddc84;
+    --yellow: #ffd166;
+    --red: #ff4757;
+    --purple: #a78bfa;
+    --teal: #2dd4bf;
+    --font-main: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-main);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #0f1117 0%, #1a1f35 50%, #0f1117 100%);
+    border-bottom: 1px solid var(--border2);
+    padding: 48px 40px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(255,107,53,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .hero-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .hero h1 {
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #fff;
+    max-width: 520px;
+    margin-bottom: 12px;
+  }
+
+  .hero h1 span { color: var(--accent); }
+
+  .hero-sub {
+    color: var(--text2);
+    font-size: 14px;
+    max-width: 480px;
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 40px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .nav-tabs::-webkit-scrollbar { display: none; }
+
+  .nav-tab {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 14px 20px;
+    cursor: pointer;
+    color: var(--text2);
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .content {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px;
+  }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* Section headers */
+  .sec-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .sec-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(255,107,53,0.1);
+    border: 1px solid rgba(255,107,53,0.3);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .sec-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  /* Defect cards */
+  .defect-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .defect-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+
+  .defect-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-2px);
+  }
+
+  .defect-card.expanded { border-color: var(--accent); }
+
+  .defect-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .defect-icon {
+    width: 40px; height: 40px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .defect-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #fff;
+    margin-bottom: 2px;
+  }
+
+  .defect-severity {
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+
+  .sev-high { color: var(--red); }
+  .sev-med { color: var(--yellow); }
+  .sev-low { color: var(--green); }
+
+  .defect-body {
+    display: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .defect-card.expanded .defect-body { display: block; }
+
+  .defect-visual {
+    padding: 12px 16px;
+    background: var(--bg3);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .defect-detail {
+    padding: 14px 16px;
+  }
+
+  .detail-row {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+
+  .detail-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text2);
+    padding-top: 2px;
+  }
+
+  .detail-val { color: var(--text); }
+
+  /* Cause-Solution table */
+  .cause-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 28px;
+    font-size: 13px;
+  }
+
+  .cause-table th {
+    background: var(--bg3);
+    padding: 10px 14px;
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text2);
+    border-bottom: 1px solid var(--border2);
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .cause-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .cause-table tr:last-child td { border-bottom: none; }
+  .cause-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-right: 4px;
+    margin-bottom: 2px;
+  }
+
+  .badge-blue { background: rgba(74,158,255,0.15); color: var(--blue); border: 1px solid rgba(74,158,255,0.3); }
+  .badge-green { background: rgba(61,220,132,0.15); color: var(--green); border: 1px solid rgba(61,220,132,0.3); }
+  .badge-yellow { background: rgba(255,209,102,0.15); color: var(--yellow); border: 1px solid rgba(255,209,102,0.3); }
+  .badge-red { background: rgba(255,71,87,0.12); color: var(--red); border: 1px solid rgba(255,71,87,0.3); }
+  .badge-purple { background: rgba(167,139,250,0.12); color: var(--purple); border: 1px solid rgba(167,139,250,0.3); }
+  .badge-orange { background: rgba(255,107,53,0.12); color: var(--accent2); border: 1px solid rgba(255,107,53,0.3); }
+
+  /* Values table */
+  .values-block {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .values-block-title {
+    padding: 12px 16px;
+    background: var(--bg3);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .values-row {
+    display: grid;
+    grid-template-columns: 200px 1fr 1fr;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .values-row:last-child { border-bottom: none; }
+  .values-row > div { padding: 10px 16px; }
+  .values-row > div:not(:last-child) { border-right: 1px solid var(--border); }
+  .values-row.header > div { font-family: var(--font-mono); font-size: 11px; color: var(--text2); background: rgba(255,255,255,0.02); }
+
+  .val-default { color: var(--green); font-family: var(--font-mono); }
+  .val-fix { color: var(--accent2); font-family: var(--font-mono); }
+
+  /* Checklist */
+  .checklist-group {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .checklist-group-title {
+    padding: 12px 16px;
+    background: var(--bg3);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .checklist-group-title .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .check-item:last-child { border-bottom: none; }
+  .check-item:hover { background: rgba(255,255,255,0.02); }
+
+  .check-box {
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--border2);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .check-item.checked .check-box {
+    background: var(--green);
+    border-color: var(--green);
+  }
+
+  .check-item.checked .check-box::after {
+    content: '';
+    width: 10px; height: 6px;
+    border-left: 2px solid #000;
+    border-bottom: 2px solid #000;
+    transform: rotate(-45deg) translateY(-1px);
+  }
+
+  .check-text { font-size: 13px; flex: 1; }
+  .check-item.checked .check-text { color: var(--text2); text-decoration: line-through; }
+  .check-note { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  .progress-bar-wrap {
+    background: var(--bg3);
+    border-radius: 3px;
+    height: 4px;
+    margin: 16px 0 24px;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+
+  .progress-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 6px;
+  }
+
+  /* Flowchart */
+  #flowchart-wrap {
+    overflow-x: auto;
+    padding-bottom: 16px;
+  }
+
+  .flow-svg { min-width: 680px; }
+
+  /* info boxes */
+  .tip-box {
+    background: rgba(74,158,255,0.07);
+    border-left: 3px solid var(--blue);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  .warn-box {
+    background: rgba(255,209,102,0.07);
+    border-left: 3px solid var(--yellow);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  .defect-section-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    margin-top: 28px;
+  }
+
+  .reset-btn {
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 6px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: all 0.15s;
+  }
+
+  .reset-btn:hover { background: var(--bg3); color: var(--text); }
+
+  /* ---- SEARCH BAR ---- */
+  .search-bar-wrap {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .search-icon {
+    color: var(--text2);
+    font-size: 14px;
+    flex-shrink: 0;
+    pointer-events: none;
+  }
+
+  #global-search {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+    max-width: 420px;
+  }
+
+  #global-search:focus { border-color: var(--accent); }
+  #global-search::placeholder { color: var(--text2); }
+
+  .search-kbd {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text2);
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    padding: 2px 6px;
+  }
+
+  #search-results-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.65);
+    z-index: 500;
+  }
+
+  #search-results-overlay.visible { display: block; }
+
+  #search-results-panel {
+    position: absolute;
+    top: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(660px, 92vw);
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .search-panel-header {
+    padding: 14px 18px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text2);
+    flex-shrink: 0;
+  }
+
+  .search-close {
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: var(--text2);
+    font-size: 14px;
+    transition: background 0.1s;
+  }
+  .search-close:hover { background: var(--border); color: var(--text); }
+
+  #search-results-list {
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .search-result-item {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.12s;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .search-result-item:last-child { border-bottom: none; }
+  .search-result-item:hover { background: var(--bg3); }
+
+  .sr-icon { font-size: 20px; flex-shrink: 0; }
+
+  .sr-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 3px;
+  }
+
+  .sr-name mark {
+    background: rgba(255,107,53,0.3);
+    color: var(--accent2);
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+
+  .sr-snippet {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+
+  .sr-section {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text2);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    margin-top: 5px;
+    display: inline-block;
+  }
+
+  .search-empty {
+    padding: 32px 18px;
+    text-align: center;
+    color: var(--text2);
+    font-size: 13px;
+  }
+
+  /* ---- QUICK DIAGNOSIS ---- */
+  .qd-shell {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .qd-progress-track {
+    height: 3px;
+    background: var(--bg3);
+  }
+
+  .qd-progress-fill {
+    height: 3px;
+    background: var(--accent);
+    transition: width 0.4s;
+  }
+
+  .qd-body { padding: 32px 28px; }
+
+  .qd-step-counter {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text2);
+    margin-bottom: 10px;
+  }
+
+  .qd-question {
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+
+  .qd-hint {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 24px;
+  }
+
+  .qd-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  @media (max-width: 520px) { .qd-options { grid-template-columns: 1fr; } }
+
+  .qd-opt {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    text-align: left;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .qd-opt:hover { border-color: var(--accent); background: rgba(255,107,53,0.05); }
+
+  .qd-opt-icon { font-size: 18px; flex-shrink: 0; }
+
+  .qd-opt-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+    margin-bottom: 2px;
+  }
+
+  .qd-opt-desc { font-size: 11px; color: var(--text2); }
+
+  .qd-back {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 6px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.15s;
+  }
+
+  .qd-back:hover { border-color: var(--border2); color: var(--text); }
+
+  /* Result card */
+  .qd-result {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 22px 22px;
+    margin-top: 4px;
+  }
+
+  .qd-result-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .qd-result-desc {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 18px;
+  }
+
+  .qd-fix-list { list-style: none; }
+
+  .qd-fix-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .qd-fix-list li:last-child { border-bottom: none; }
+
+  .qd-fix-num {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    background: rgba(255,107,53,0.15);
+    color: var(--accent);
+    border-radius: 4px;
+    padding: 2px 7px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .qd-restart {
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 10px 22px;
+    border-radius: 7px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: opacity 0.15s;
+  }
+
+  .qd-restart:hover { opacity: 0.85; }
+
+  @media print {
+    .nav-tabs, .hero, .search-bar-wrap { display: none; }
+    .section { display: block !important; }
+    body { background: white; color: black; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-tag">// Guia Técnico FDM — Engenharia Prática</div>
+  <h1>Como identificar e corrigir <span>defeitos em impressão 3D</span></h1>
+  <p class="hero-sub">Diagnóstico visual → Causa raiz → Ajuste com valores reais. Sem enrolação.</p>
+</div>
+
+<div class="search-bar-wrap">
+  <span class="search-icon">🔍</span>
+  <input type="text" id="global-search" placeholder="Buscar defeito, causa ou solução... (ex: stringing, warping, bico)" autocomplete="off" oninput="runSearch(this.value)" onfocus="if(this.value.trim()) showSearchOverlay()" />
+  <span class="search-kbd">Esc para fechar</span>
+</div>
+
+<div id="search-results-overlay" onclick="closeSearchIfOutside(event)">
+  <div id="search-results-panel">
+    <div class="search-panel-header">
+      <span id="search-count-label">Resultados</span>
+      <span class="search-close" onclick="closeSearch()">✕</span>
+    </div>
+    <div id="search-results-list"></div>
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="showSection('diag')">01 · Diagnóstico Visual</div>
+  <div class="nav-tab" onclick="showSection('causas')">02 · Causas e Soluções</div>
+  <div class="nav-tab" onclick="showSection('valores')">03 · Valores de Ajuste</div>
+  <div class="nav-tab" onclick="showSection('checklist')">04 · Checklist Final</div>
+  <div class="nav-tab" onclick="showSection('fluxo')">05 · Fluxograma</div>
+  <div class="nav-tab" onclick="showSection('qdiag')" style="color:#ff9a5c;">⚡ Diagnóstico Rápido</div>
+</div>
+
+<!-- ======== SECAO 1: DIAGNOSTICO ======== -->
+<div class="section active" id="diag">
+<div class="content">
+  <div class="sec-header">
+    <span class="sec-num">01</span>
+    <span class="sec-title">Diagnóstico Visual dos Defeitos</span>
+  </div>
+
+  <div class="tip-box">42 defeitos catalogados. Clique em qualquer card para ver causa, diagnóstico e fix. Use a <strong>busca</strong> no topo para localizar rapidamente.</div>
+
+  <!-- CAT 1: ADESÃO E PRIMEIRA CAMADA -->
+  <div class="defect-section-label">01 · Adesão e Primeira Camada</div>
+  <div class="defect-grid">
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(61,220,132,0.15);">🧲</div>
+        <div><div class="defect-name">Primeira Camada Não Adere</div><div class="defect-severity sev-high">● Alta frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: filamento não gruda, "espaguete" desde a 1ª linha<br>Onde: toda a base da peça<br>Exemplo: linhas soltas arrastadas pelo bico</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Z offset alto demais — bico longe demais da mesa</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Superfície suja com gordura, pó ou resíduos</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #3</span><span class="detail-val">Temperatura da mesa insuficiente para o material</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-orange">↓ Z offset</span><span class="badge badge-green">Limpar com IPA 70%</span><span class="badge badge-yellow">↑ Mesa 5°C</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(61,220,132,0.15);">📐</div>
+        <div><div class="defect-name">Warping / Empenamento</div><div class="defect-severity sev-high">● Alta frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: cantos levantados da mesa, peça curva<br>Materiais mais afetados: ABS, ASA, Nylon<br>Exemplo: caixa retangular grande com cantos curvados</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Contração térmica rápida do polímero ao esfriar</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Mesa fria ou suja — sem adesão nas extremidades</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-blue">Enclosure fechado</span><span class="badge badge-green">Brim 5–10mm</span><span class="badge badge-yellow">↓ Fan nas 1ªs camadas</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(255,209,102,0.15);">🏔️</div>
+        <div><div class="defect-name">Elephant Foot / Pata de Elefante</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: primeira(s) camada(s) mais largas que o modelo<br>Onde: base da peça, visível ao lado<br>Exemplo: cilindro com base "esmagada" formando aba</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Z offset baixo demais — bico esmagando material</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Temperatura da mesa muito alta mantém plástico em estado vítreo</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-blue">↑ Z offset 0.05mm</span><span class="badge badge-yellow">↓ Mesa 5°C após 1ª camada</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(74,158,255,0.15);">⬛</div>
+        <div><div class="defect-name">Gaps na Camada Inferior</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: linhas espaçadas / buracos na base da peça<br>Onde: 1ª e 2ª camadas<br>Exemplo: base com "grades" ao invés de superfície sólida</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Bico longe demais da mesa — filamento não se cola</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Flow da primeira camada muito baixo</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-orange">↓ Z offset</span><span class="badge badge-blue">Initial Layer Flow: 105%</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(255,71,87,0.15);">❄️</div>
+        <div><div class="defect-name">Contração nas Primeiras Camadas</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: bordas da base se retraem logo depois de impressas<br>Onde: primeiras 3–5 camadas<br>Exemplo: ABS com cantos enrolando antes do warping completo</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Resfriamento muito rápido nas primeiras camadas</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Diferença extrema entre temperatura da mesa e do ambiente</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-blue">Fan OFF nas 3 primeiras camadas</span><span class="badge badge-orange">Câmara fechada para ABS</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(61,220,132,0.15);">🔒</div>
+        <div><div class="defect-name">Peça Grudou e Não Sai</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: peça impossível de remover sem danificar<br>Onde: base inteira colada à superfície<br>Exemplo: PETG fundido quimicamente com o vidro</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Z offset baixo demais — adesão mecânica excessiva</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">PETG em vidro sem separador — fusão química</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-blue">Mesa no freezer 5 min</span><span class="badge badge-green">Espátula cuidadosa</span><span class="badge badge-yellow">Usar cola bastão como separador</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(255,107,53,0.15);">📍</div>
+        <div><div class="defect-name">Corner Lifting / Cantos Levantados</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: cantos agudos se levantam localmente<br>Onde: arestas e ângulos de 90° ou menos<br>Exemplo: peça quadrada com quinas levantadas mesmo sem warping geral</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa</span><span class="detail-val">Concentração de tensão em cantos agudos durante resfriamento</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-green">Mouse Ears nos cantos</span><span class="badge badge-blue">Arredondar cantos no design</span><span class="badge badge-yellow">Brim local</span></span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CAT 2: EXTRUSÃO E FLUXO -->
+  <div class="defect-section-label">02 · Extrusão e Fluxo</div>
+  <div class="defect-grid">
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(74,158,255,0.15);">⬜</div>
+        <div><div class="defect-name">Under-extrusion / Falta de Extrusão</div><div class="defect-severity sev-high">● Alta frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: linhas finas, gaps visíveis, peça fraca<br>Onde: todo o volume da peça<br>Exemplo: parede com "buracos" ou linhas soltas</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Bico parcialmente entupido</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Temperatura baixa — material não flui corretamente</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #3</span><span class="detail-val">E-steps do extrusor descalibrados</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-orange">Cold Pull</span><span class="badge badge-yellow">↑ Temp 5–10°C</span><span class="badge badge-blue">Calibrar E-steps</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(255,107,53,0.15);">🔴</div>
+        <div><div class="defect-name">Over-extrusion / Excesso de Extrusão</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: bolinhas, gotas, superfície irregular e brilhante<br>Onde: início de linhas, cantos, curvas<br>Exemplo: cubo com faces "bolhosas"</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Flow rate muito alto no slicer</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Temperatura excessiva → baixa viscosidade</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-yellow">Flow: 95%</span><span class="badge badge-yellow">↓ Temp 5°C</span><span class="badge badge-blue">Calibrar diâmetro do filamento</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(167,139,250,0.15);">🚫</div>
+        <div><div class="defect-name">Bico Entupido / Clogged Nozzle</div><div class="defect-severity sev-high">● Alta gravidade</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: extrusão para completamente ou fica intermitente<br>Som: cliques no extrusor (grinding)<br>Exemplo: impressão começa normal e para repentinamente</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Partículas de poeira, restos carbonizados no bico</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Transição entre materiais de temperaturas diferentes</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #3</span><span class="detail-val">PTFE degradado na zona quente (&gt;240°C sem All-Metal)</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-orange">Cold Pull 90°C (PLA)</span><span class="badge badge-red">Agulha de limpeza</span><span class="badge badge-yellow">Substituir bico</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(74,158,255,0.15);">📊</div>
+        <div><div class="defect-name">Extrusão Inconsistente</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: linhas com espessura variável ao longo da peça<br>Onde: paredes e infill com aspecto irregular<br>Exemplo: parede com regiões grossas e finas alternadas</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Filamento com diâmetro irregular — medir a cada metro</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Engrenagem do extrusor gasta ou carretel prendendo</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-blue">Verificar tensão do extrusor</span><span class="badge badge-green">Garantir carretel girando livre</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(255,71,87,0.15);">🌡️</div>
+        <div><div class="defect-name">Heat Creep / Extrusão Para no Meio</div><div class="defect-severity sev-high">● Alta gravidade</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: impressão começa bem e para após 10–30 min<br>Causa: filamento derrete antes da zona de fusão e trava<br>Exemplo: Ender-3 imprimindo PLA em ambiente quente</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Ventoinha do hotend fraca ou parada — calor sobe pelo barrel</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Retração excessiva arrasta material fundido para cima</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-red">Verificar fan do hotend</span><span class="badge badge-yellow">↓ Distância de retração</span><span class="badge badge-orange">Trocar PTFE se amarelado</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(255,209,102,0.15);">⚙️</div>
+        <div><div class="defect-name">Filamento Patinando / Grinding</div><div class="defect-severity sev-high">● Alta gravidade</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: pó de filamento acumulado no extrusor<br>Som: "crunch" repetitivo<br>Exemplo: engrenagem desgastando o filamento sem empurrá-lo</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Extrusor empurrando contra obstrução — bico entupido</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Bico frio demais — resistência mecânica alta</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-yellow">↓ Velocidade de retração</span><span class="badge badge-orange">↑ Temp bico 5°C</span><span class="badge badge-green">Limpar engrenagem do extrusor</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(61,220,132,0.15);">🔇</div>
+        <div><div class="defect-name">Não Sai Material no Início</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: bico se move mas não extruда nas primeiras linhas<br>Onde: início absoluto da impressão<br>Exemplo: os primeiros 5–10cm da prime line não aparecem</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa</span><span class="detail-val">Filamento vazou durante aquecimento (oozing) — bico vazio</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-blue">Adicionar Prime Line no G-code de início</span><span class="badge badge-yellow">Purge tower no slicer</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(255,71,87,0.15);">💦</div>
+        <div><div class="defect-name">Bico Vazando / Nozzle Oozing</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: fio de material escorre do bico parado ou em travel<br>Onde: entre impressões e no início de novas linhas<br>Exemplo: bola de material no bico ao aquecer</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Temperatura muito alta — material muito fluido</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Falta de retração suficiente</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-yellow">↓ Temperatura 5°C</span><span class="badge badge-blue">↑ Distância de retração</span></span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CAT 3: QUALIDADE DE SUPERFÍCIE -->
+  <div class="defect-section-label">03 · Qualidade de Superfície e Acabamento</div>
+  <div class="defect-grid">
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(255,71,87,0.15);">🕸️</div>
+        <div><div class="defect-name">Stringing / Fiapos</div><div class="defect-severity sev-high">● Alta frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: fios finos entre partes separadas da peça<br>Onde: deslocamentos em vazio (travel moves)<br>Exemplo: impressão de uma letra "A" com fio no vão</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Temperatura muito alta — material goteja durante travel</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Retração insuficiente ou desativada</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-yellow">↓ Temp 5–10°C</span><span class="badge badge-blue">↑ Retração 1–2mm</span><span class="badge badge-green">↑ Velocidade travel</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(255,107,53,0.15);">🔵</div>
+        <div><div class="defect-name">Z-Seam / Bolhas nas Laterais</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: marca vertical contínua numa lateral da peça<br>Onde: ponto de início/fim de cada perímetro<br>Exemplo: vaso com linha vertical visível do início ao topo</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa</span><span class="detail-val">Início e fim de perímetro no mesmo ponto — acúmulo de material</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-blue">Z-Seam: Sharpest Corner</span><span class="badge badge-yellow">Wipe Distance: 1mm</span><span class="badge badge-green">Seam Scattering (aleatório)</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(45,212,191,0.12);">🌀</div>
+        <div><div class="defect-name">Ringing / Ghosting / Efeito Fantasma</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: ondulações/eco nas bordas após cantos agudos<br>Onde: superfícies planas perto de cantos<br>Exemplo: cubo com "sombra" paralela às arestas</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Inércia mecânica — velocidade/aceleração altas com correias frouxas</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Ressonância do frame da impressora</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-yellow">↓ Aceleração e Jerk</span><span class="badge badge-blue">Input Shaping (Klipper)</span><span class="badge badge-orange">Tensionar correias</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(255,71,87,0.15);">🫠</div>
+        <div><div class="defect-name">Impressão Derretida / Overheating</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: camadas superiores amorfas, detalhes perdidos<br>Onde: peças pequenas ou regiões com volume pequeno<br>Exemplo: topo de torre ou pirâmide com aspecto "derretido"</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa</span><span class="detail-val">Camadas pequenas impressas rápido demais — sem tempo de resfriar</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-blue">Minimum Layer Time: 10–15s</span><span class="badge badge-green">Fan 100%</span><span class="badge badge-yellow">Imprimir 2 peças juntas</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(74,158,255,0.15);">🏠</div>
+        <div><div class="defect-name">Falhas no Top Layer / Pillowing</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: topo com buracos, amassados ou textura de almofada<br>Onde: tampa superior da peça<br>Exemplo: caixa com topo irregular parecendo tecido</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Poucas camadas de topo — infill aparece por baixo</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Resfriamento insuficiente no topo</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-blue">Top Layers: 5–6 camadas</span><span class="badge badge-green">Fan: 100%</span><span class="badge badge-yellow">↑ Infill %</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(255,107,53,0.12);">✂️</div>
+        <div><div class="defect-name">Cicatrizes no Topo / Nozzle Drag</div><div class="defect-severity sev-low">● Baixa frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: riscos, marcas de arrasto na camada superior<br>Onde: superfície superior plana<br>Exemplo: bico raspando e arrastando material ao mover</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Bico raspa na peça ao se deslocar — sem Z-Hop</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Over-extrusion elevando o topo acima do esperado</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-blue">Habilitar Z-Hop 0.2mm</span><span class="badge badge-yellow">↓ Flow do top layer</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(167,139,250,0.12);">〰️</div>
+        <div><div class="defect-name">Ondulações / VFA / Ripples</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: linhas finas horizontais regulares nas laterais<br>Onde: superfícies verticais da peça<br>Exemplo: peça com padrão de "listras" sutis periódicas</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Vibração dos motores de passo (VFA — Vertical Fine Artifacts)</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Imperfeições nas polias ou correias</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-orange">Verificar tensão das correias</span><span class="badge badge-blue">Drivers TMC silenciosos</span><span class="badge badge-green">Pés anti-vibração de borracha</span></span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CAT 4: ESTRUTURA E GEOMETRIA -->
+  <div class="defect-section-label">04 · Estrutura e Geometria</div>
+  <div class="defect-grid">
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(74,158,255,0.12);">📉</div>
+        <div><div class="defect-name">Layer Separation / Delamination</div><div class="defect-severity sev-high">● Alta gravidade</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: camadas se separam ou apresentam gaps horizontais<br>Onde: qualquer região da peça<br>Exemplo: vaso com fenda horizontal visível</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Temperatura muito baixa — camadas não fundem entre si</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Layer height muito grande para o diâmetro do bico</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #3</span><span class="detail-val">Vento externo esfriando ABS rapidamente</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-orange">↑ Temp 10–15°C</span><span class="badge badge-yellow">Layer height ≤ 75% do bico</span><span class="badge badge-blue">↓ Fan ou enclosure</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(255,71,87,0.12);">🌊</div>
+        <div><div class="defect-name">Layer Shifting / Desalinhamento</div><div class="defect-severity sev-high">● Alta gravidade</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: camadas deslocadas horizontalmente, peça "torta"<br>Onde: qualquer altura da peça<br>Exemplo: cubo com degraus laterais visíveis</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Correia frouxa (GT2) nos eixos X ou Y</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Velocidade muito alta — motor perde passos</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #3</span><span class="detail-val">Driver de motor superaquecido</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-orange">Tensionar correia</span><span class="badge badge-yellow">↓ Velocidade 30%</span><span class="badge badge-red">Verificar obstruções físicas nos eixos</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(255,107,53,0.12);">🔺</div>
+        <div><div class="defect-name">Overhangs / Falhas em Balanço</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: material "cai" em regiões sem suporte<br>Onde: ângulos &gt;45–50° sem suporte<br>Exemplo: pontes e volanços com fios caídos</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Resfriamento insuficiente — material não solidifica rápido</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Velocidade alta em pontes — material não fecha</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-blue">Fan 100%</span><span class="badge badge-yellow">Bridge speed ↓ 30mm/s</span><span class="badge badge-green">↓ Altura de camada</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(61,220,132,0.15);">🌉</div>
+        <div><div class="defect-name">Ponte Defeituosa / Poor Bridging</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: filamento caindo no meio de vãos horizontais<br>Onde: qualquer seção sem suporte abaixo<br>Exemplo: janela retangular com base caída no meio</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa</span><span class="detail-val">Plástico não solidifica rápido suficiente ao cruzar o vão</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-yellow">Bridge Speed: 20–30mm/s</span><span class="badge badge-blue">Fan 100%</span><span class="badge badge-orange">↓ Temperatura 5°C</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(74,158,255,0.15);">📐</div>
+        <div><div class="defect-name">Gaps em Paredes Finas</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: paredes finas com lacunas ou não impressas<br>Onde: geometrias com espessura &lt; 2x diâmetro do bico<br>Exemplo: parede de 0.6mm com bico 0.4mm não preenchida</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa</span><span class="detail-val">Espessura da parede não é múltipla do diâmetro do bico</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-blue">Habilitar "Fill Gaps between Walls"</span><span class="badge badge-green">Habilitar "Print Thin Walls"</span><span class="badge badge-yellow">Redesenhar parede em múltiplos de 0.4mm</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(255,209,102,0.15);">🔲</div>
+        <div><div class="defect-name">Infill Fraco / Gaps Infill-Contorno</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: infill se separando das paredes ou muito fraco<br>Onde: interior da peça<br>Exemplo: infill Grid com lacunas nas bordas</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Velocidade do infill muito alta — sub-extrusão localizada</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Infill Overlap insuficiente no slicer</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-yellow">↓ Velocidade infill</span><span class="badge badge-blue">Infill Overlap: 15–25%</span><span class="badge badge-green">Trocar para Gyroid ou Honeycomb</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(167,139,250,0.15);">📏</div>
+        <div><div class="defect-name">Imprecisão Dimensional</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: peça fora das medidas esperadas<br>Onde: dimensões X, Y ou Z incorretas<br>Exemplo: furo de 10mm saindo com 9.7mm</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Contração do material ao esfriar</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Steps/mm dos motores desregulados</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-blue">Horizontal Expansion no slicer</span><span class="badge badge-orange">Calibrar X/Y/Z Steps</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(255,71,87,0.15);">🔍</div>
+        <div><div class="defect-name">Detalhes Finos / Small Features Faltando</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: detalhes pequenos não aparecem na peça final<br>Onde: letras, relevos, texturas finas<br>Exemplo: texto em relevo em miniatura não impresso</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa</span><span class="detail-val">Detalhe menor que o bico pode imprimir (&lt;0.4mm para bico 0.4mm)</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-blue">Bico 0.2mm</span><span class="badge badge-yellow">Layer height 0.1mm</span><span class="badge badge-green">Detect Thin Walls no slicer</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(45,212,191,0.12);">🪁</div>
+        <div><div class="defect-name">Paredes Não se Tocam</div><div class="defect-severity sev-low">● Baixa frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: perímetros internos e externos com gap entre eles<br>Onde: paredes duplas ou múltiplas<br>Exemplo: tubo com camada interna e externa separadas</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Sub-extrusão ou sobreposição de perímetros insuficiente</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Bico desgastado com furo maior que o nominal</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-blue">↑ Wall Overlap</span><span class="badge badge-yellow">Verificar diâmetro real do bico</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(255,107,53,0.12);">🫧</div>
+        <div><div class="defect-name">Camadas Faltando / Missing Layers</div><div class="defect-severity sev-high">● Alta gravidade</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: buracos horizontais ou regiões sem material no meio da peça<br>Onde: altura aleatória na peça<br>Exemplo: vaso com "janela" aberta no meio</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Filamento travado temporariamente no carretel</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Falha mecânica no eixo Z — fuso enroscado</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-orange">Lubrificar fuso Z</span><span class="badge badge-blue">Verificar carretel sem nós</span><span class="badge badge-yellow">Sensor de fim de filamento</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(74,158,255,0.12);">🌬️</div>
+        <div><div class="defect-name">Impressora Imprimindo no Ar</div><div class="defect-severity sev-high">● Alta gravidade</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: extrusor se move mas não sai nada<br>Onde: qualquer momento da impressão<br>Exemplo: bico se movendo normalmente mas sem filamento</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Entupimento total ou quebra de filamento</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Fim do carretel sem sensor de runout</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #3</span><span class="detail-val">Heat Creep travando o filamento acima do bico</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-red">Instalar sensor de fim de filamento</span><span class="badge badge-orange">Cold pull + verificar PTFE</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(255,209,102,0.15);">🔬</div>
+        <div><div class="defect-name">Perda de Detalhes / Loss of Detail</div><div class="defect-severity sev-low">● Baixa frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: peça "borrada", detalhes redondos ou suavizados demais<br>Onde: toda a superfície da peça<br>Exemplo: escultura com feições suaves/arredondadas</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa</span><span class="detail-val">Altura de camada muito alta para o tamanho da peça</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-blue">Layer height 0.08–0.1mm</span><span class="badge badge-yellow">↓ Velocidade de impressão</span></span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CAT 5: MATERIAIS E HARDWARE -->
+  <div class="defect-section-label">05 · Materiais e Manutenção</div>
+  <div class="defect-grid">
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(167,139,250,0.12);">💧</div>
+        <div><div class="defect-name">Filamento Úmido / Wet Filament</div><div class="defect-severity sev-high">● Problema oculto</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: estalidos, bolhas, superfície irregular, cor opaca<br>Sons: pop-pop-pop durante impressão<br>Materiais mais afetados: Nylon, TPU, PVA, PETG</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa</span><span class="detail-val">Polímero higroscópico absorveu água — vira vapor no hotend</span></div>
+          <div class="detail-row"><span class="detail-label">Teste</span><span class="detail-val">Extrudar em vazio: estalidos + bolhas = úmido</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-orange">PLA: 50°C 4–6h</span><span class="badge badge-orange">Nylon: 80°C 12–24h</span><span class="badge badge-blue">Dry Box durante impressão</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(255,71,87,0.15);">💔</div>
+        <div><div class="defect-name">Filamento Quebrando / Brittle Filament</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: filamento quebra no carretel ou ao ser manuseado<br>Onde: qualquer ponto entre carretel e extrusor<br>Exemplo: PLA antigo estorando ao dobrar levemente</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Filamento degradado por absorção de umidade ao longo do tempo</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Exposição a raios UV por tempo prolongado</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-orange">Secar em estufa 4–6h</span><span class="badge badge-yellow">Armazenar com dessecante</span><span class="badge badge-red">Filamento muito antigo: descartar</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(255,107,53,0.15);">🫙</div>
+        <div><div class="defect-name">Bolhas / Buracos na Superfície</div><div class="defect-severity sev-med">● Média frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: pitting, micro-buracos ou bolhas nas laterais<br>Onde: toda a superfície externa<br>Exemplo: peça com aspecto poroso ou cratera</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa</span><span class="detail-val">Umidade evaporando dentro do filamento durante extrusão</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-orange">Secar o filamento</span><span class="badge badge-blue">Usar Dry Box com dessecante ativo</span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="defect-card" onclick="toggleCard(this)">
+      <div class="defect-header">
+        <div class="defect-icon" style="background:rgba(61,220,132,0.15);">🛠️</div>
+        <div><div class="defect-name">Interface de Suporte com Problema</div><div class="defect-severity sev-low">● Baixa frequência</div></div>
+      </div>
+      <div class="defect-body">
+        <div class="defect-visual">Aparência: suporte perfeito mas superfície da peça abaixo está ruim<br>Onde: face da peça apoiada em suporte<br>Exemplo: fundo de arco com textura rugosa e marcas</div>
+        <div class="defect-detail">
+          <div class="detail-row"><span class="detail-label">Causa #1</span><span class="detail-val">Z Distance do suporte grande demais — peça sem apoio real</span></div>
+          <div class="detail-row"><span class="detail-label">Causa #2</span><span class="detail-val">Z Distance pequena demais — suporte funde com a peça</span></div>
+          <div class="detail-row"><span class="detail-label">Fix rápido</span><span class="detail-val"><span class="badge badge-blue">Support Z Distance = 1x layer height</span><span class="badge badge-yellow">Interface de suporte PVA ou PA12</span></span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ======== SECAO 2: CAUSAS ======== -->
+<div class="section" id="causas">
+<div class="content">
+  <div class="sec-header">
+    <span class="sec-num">02</span>
+    <span class="sec-title">Causas Raiz → Soluções Práticas</span>
+  </div>
+
+  <div class="warn-box">Cada causa raiz pode gerar múltiplos defeitos. Esta tabela organiza por variável de controle.</div>
+
+  <p class="defect-section-label">Temperatura</p>
+  <table class="cause-table">
+    <thead>
+      <tr><th>Sintoma</th><th>Causa</th><th>Solução</th><th>Material</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Stringing intenso</td><td>Hotend quente demais → baixa viscosidade</td><td>Reduzir temp. em 5–10°C, testar incrementalmente</td><td><span class="badge badge-green">PLA</span><span class="badge badge-blue">PETG</span></td></tr>
+      <tr><td>Layer separation</td><td>Temperatura baixa → camadas não fundem</td><td>Aumentar temp. 10°C. Verificar faixa do fabricante</td><td><span class="badge badge-purple">Nylon</span><span class="badge badge-orange">ABS</span></td></tr>
+      <tr><td>Blobs e zits</td><td>Temp. alta + retração insuficiente</td><td>Ativar "wipe" e "coast" no slicer. ↓ Temp 5°C</td><td><span class="badge badge-green">PLA</span></td></tr>
+      <tr><td>Queima do filamento</td><td>Temp. muito alta para o material</td><td>Verificar faixa do fabricante. Limpar bico (cold pull)</td><td>Todos</td></tr>
+    </tbody>
+  </table>
+
+  <p class="defect-section-label">Velocidade</p>
+  <table class="cause-table">
+    <thead>
+      <tr><th>Sintoma</th><th>Causa</th><th>Solução</th><th>Impacto</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Ringing / Ghosting</td><td>Inércia mecânica em alta velocidade</td><td>↓ Velocidade para 40–60mm/s. Usar Input Shaping</td><td><span class="badge badge-red">Estético</span></td></tr>
+      <tr><td>Layer shifting</td><td>Motor perde passos em velocidade alta</td><td>↓ Velocidade 20–30%. Verificar corrente do driver</td><td><span class="badge badge-red">Crítico</span></td></tr>
+      <tr><td>Overhangs ruins</td><td>Velocidade alta em pontes → material cai</td><td>Bridge speed: 20–30mm/s. Fan 100%</td><td><span class="badge badge-yellow">Estrutural</span></td></tr>
+      <tr><td>Under-extrusion</td><td>Velocidade > capacidade de fusão do hotend</td><td>↓ Velocidade ou ↑ temperatura</td><td><span class="badge badge-red">Crítico</span></td></tr>
+    </tbody>
+  </table>
+
+  <p class="defect-section-label">Retração</p>
+  <table class="cause-table">
+    <thead>
+      <tr><th>Sintoma</th><th>Causa</th><th>Solução</th><th>Tipo de Extrusor</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Stringing forte</td><td>Retração muito curta ou desativada</td><td>Direct Drive: 0.5–2mm | Bowden: 4–7mm</td><td><span class="badge badge-blue">Ambos</span></td></tr>
+      <tr><td>Under-extrusion após travel</td><td>Retração excessiva → ar no hotend</td><td>Reduzir retração em 0.5mm incrementalmente</td><td><span class="badge badge-orange">Bowden</span></td></tr>
+      <tr><td>Blobs no ponto de retorno</td><td>Velocidade de retração muito baixa</td><td>↑ Velocidade retração: 25–45mm/s</td><td><span class="badge badge-blue">Ambos</span></td></tr>
+    </tbody>
+  </table>
+
+  <p class="defect-section-label">Mesa / Primeira Camada</p>
+  <table class="cause-table">
+    <thead>
+      <tr><th>Sintoma</th><th>Causa</th><th>Solução</th><th>Prioridade</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Peça solta durante impressão</td><td>Mesa fria ou suja (gordura, pó)</td><td>Limpar com IPA 70%. Temperatura correta por material</td><td><span class="badge badge-red">Alta</span></td></tr>
+      <tr><td>Warping nos cantos</td><td>Contração térmica sem enclosure</td><td>Brim 5–8mm. Enclosure. ↑ Temperatura da mesa</td><td><span class="badge badge-red">Alta</span></td></tr>
+      <tr><td>Elephant foot</td><td>Z offset muito baixo (esmagamento)</td><td>↑ Z offset 0.02–0.05mm por vez. Nível a mesa</td><td><span class="badge badge-yellow">Média</span></td></tr>
+      <tr><td>Primeira camada fraca</td><td>Z offset muito alto (não adere)</td><td>↓ Z offset. Primeira camada: 0.2–0.3mm height ideal</td><td><span class="badge badge-yellow">Média</span></td></tr>
+    </tbody>
+  </table>
+
+  <p class="defect-section-label">Mecânica e Hardware</p>
+  <table class="cause-table">
+    <thead>
+      <tr><th>Sintoma</th><th>Causa</th><th>Diagnóstico</th><th>Solução</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Layer shifting</td><td>Correia frouxa no eixo X ou Y</td><td>Pressionar correia: deve ter tensão de violão</td><td>Retensionar. Substituir se desgastada</td></tr>
+      <tr><td>Extrusão irregular</td><td>Engrenagem do extrusor com sujeira</td><td>Verificar pó de filamento acumulado</td><td>Limpar com escova. Verificar tensão do tensor</td></tr>
+      <tr><td>Z wobble (ondulação Z)</td><td>Fuso Z desalinhado ou torto</td><td>Mover cama: visualmente verificar wobble</td><td>Alinhar couplers. Verificar fuso reto</td></tr>
+      <tr><td>Clicking no extrusor</td><td>Slip de filamento — entupimento ou temp. baixa</td><td>Extrudar manualmente: resiste? → clog</td><td>Cold pull. ↑ Temperatura 5°C</td></tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<!-- ======== SECAO 3: VALORES ======== -->
+<div class="section" id="valores">
+<div class="content">
+  <div class="sec-header">
+    <span class="sec-num">03</span>
+    <span class="sec-title">Ajustes Recomendados com Valores</span>
+  </div>
+
+  <div class="tip-box">Use estes valores como ponto de partida. Sempre ajuste em incrementos pequenos e imprima um teste a cada mudança.</div>
+
+  <div class="values-block">
+    <div class="values-block-title">🌡️ Temperaturas por Material (bico / mesa)</div>
+    <div class="values-row header"><div>Material</div><div>Faixa Normal</div><div>Ajuste p/ Problemas</div></div>
+    <div class="values-row"><div>PLA</div><div><span class="val-default">195–215°C / 50–60°C</span></div><div><span class="val-fix">Stringing: ↓ 5°C | Delamination: ↑ 10°C</span></div></div>
+    <div class="values-row"><div>PETG</div><div><span class="val-default">230–245°C / 70–85°C</span></div><div><span class="val-fix">Stringing forte: ↓ 5°C + ↑ retração | Blobs: ↓ 5°C</span></div></div>
+    <div class="values-row"><div>ABS</div><div><span class="val-default">230–250°C / 100–110°C</span></div><div><span class="val-fix">Warping: ↑ mesa + enclosure | Camadas: ↑ 5–10°C</span></div></div>
+    <div class="values-row"><div>ASA</div><div><span class="val-default">240–260°C / 90–110°C</span></div><div><span class="val-fix">Similar ao ABS. UV-resistente. Requer enclosure</span></div></div>
+    <div class="values-row"><div>Nylon</div><div><span class="val-default">240–270°C / 70–90°C</span></div><div><span class="val-fix">SEMPRE secar antes. Warping severo: brim largo + enclosure</span></div></div>
+    <div class="values-row"><div>TPU (Flex)</div><div><span class="val-default">220–240°C / 30–60°C</span></div><div><span class="val-fix">↓ Velocidade 20–30mm/s. Sem retração (Direct Drive)</span></div></div>
+  </div>
+
+  <div class="values-block">
+    <div class="values-block-title">🔄 Retração por Tipo de Extrusor</div>
+    <div class="values-row header"><div>Extrusor</div><div>Distância</div><div>Velocidade</div></div>
+    <div class="values-row"><div>Direct Drive</div><div><span class="val-default">0.5 – 2.0 mm</span></div><div><span class="val-default">25 – 45 mm/s</span></div></div>
+    <div class="values-row"><div>Bowden (Curto &lt; 40cm)</div><div><span class="val-default">3.0 – 5.0 mm</span></div><div><span class="val-default">40 – 60 mm/s</span></div></div>
+    <div class="values-row"><div>Bowden (Longo &gt; 40cm)</div><div><span class="val-default">5.0 – 7.0 mm</span></div><div><span class="val-default">45 – 65 mm/s</span></div></div>
+    <div class="values-row"><div>PETG (qualquer)</div><div><span class="val-fix">Reduzir em 30–40% vs PLA</span></div><div><span class="val-fix">Mesmo valor. PETG ≠ PLA</span></div></div>
+  </div>
+
+  <div class="values-block">
+    <div class="values-block-title">⚡ Velocidades de Impressão</div>
+    <div class="values-row header"><div>Parâmetro</div><div>Valor Conservador</div><div>Valor Agressivo</div></div>
+    <div class="values-row"><div>Perímetros externos</div><div><span class="val-default">30 – 40 mm/s</span></div><div><span class="val-fix">50 – 60 mm/s</span></div></div>
+    <div class="values-row"><div>Perímetros internos</div><div><span class="val-default">50 – 60 mm/s</span></div><div><span class="val-fix">80 – 100 mm/s</span></div></div>
+    <div class="values-row"><div>Infill</div><div><span class="val-default">60 – 80 mm/s</span></div><div><span class="val-fix">100 – 150 mm/s</span></div></div>
+    <div class="values-row"><div>Pontes (bridges)</div><div><span class="val-default">20 – 30 mm/s</span></div><div><span class="val-fix">—  não aumentar</span></div></div>
+    <div class="values-row"><div>Primeira camada</div><div><span class="val-default">15 – 25 mm/s</span></div><div><span class="val-fix">—  não aumentar</span></div></div>
+    <div class="values-row"><div>Travel (sem extrusão)</div><div><span class="val-default">150 – 200 mm/s</span></div><div><span class="val-fix">250 – 300 mm/s</span></div></div>
+  </div>
+
+  <div class="values-block">
+    <div class="values-block-title">📏 Layer Height vs Diâmetro do Bico</div>
+    <div class="values-row header"><div>Bico</div><div>Layer Height Mínimo</div><div>Layer Height Máximo</div></div>
+    <div class="values-row"><div>0.2mm</div><div><span class="val-default">0.05 mm</span></div><div><span class="val-fix">0.15 mm (75%)</span></div></div>
+    <div class="values-row"><div>0.4mm (padrão)</div><div><span class="val-default">0.05 mm</span></div><div><span class="val-fix">0.30 mm (75%)</span></div></div>
+    <div class="values-row"><div>0.6mm</div><div><span class="val-default">0.10 mm</span></div><div><span class="val-fix">0.45 mm (75%)</span></div></div>
+    <div class="values-row"><div>0.8mm</div><div><span class="val-default">0.15 mm</span></div><div><span class="val-fix">0.60 mm (75%)</span></div></div>
+  </div>
+
+  <div class="values-block">
+    <div class="values-block-title">🌬️ Temperatura de Secagem de Filamentos</div>
+    <div class="values-row header"><div>Material</div><div>Temperatura</div><div>Tempo</div></div>
+    <div class="values-row"><div>PLA</div><div><span class="val-default">45 – 55°C</span></div><div><span class="val-default">4 – 6h</span></div></div>
+    <div class="values-row"><div>PETG</div><div><span class="val-default">60 – 70°C</span></div><div><span class="val-default">6 – 8h</span></div></div>
+    <div class="values-row"><div>ABS / ASA</div><div><span class="val-default">65 – 80°C</span></div><div><span class="val-default">4 – 6h</span></div></div>
+    <div class="values-row"><div>Nylon (PA)</div><div><span class="val-fix">80 – 90°C</span></div><div><span class="val-fix">12 – 24h</span></div></div>
+    <div class="values-row"><div>TPU</div><div><span class="val-default">50 – 60°C</span></div><div><span class="val-default">6 – 8h</span></div></div>
+  </div>
+</div>
+</div>
+
+<!-- ======== SECAO 4: CHECKLIST ======== -->
+<div class="section" id="checklist">
+<div class="content">
+  <div class="sec-header">
+    <span class="sec-num">04</span>
+    <span class="sec-title">Checklist Final Imprimível</span>
+  </div>
+
+  <p class="defect-section-label">Progresso da Sessão</p>
+  <div class="progress-label" id="progress-label">0 de 24 itens verificados</div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar" style="width: 0%"></div></div>
+  <button class="reset-btn" onclick="resetChecklist()">↺ Reiniciar checklist</button>
+
+  <div class="checklist-group">
+    <div class="checklist-group-title"><span class="dot" style="background: var(--yellow)"></span>Antes de Iniciar</div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Mesa nivelada (manual ou ABL verificado)</div><div class="check-note">Z offset: primeira camada deve ser levemente achatada, sem espaguete</div></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Mesa limpa com IPA 70% ou álcool isopropílico</div><div class="check-note">Gordura de dedos elimina adesão. Sempre limpar antes</div></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Filamento seco (verificado com extrusão em vazio)</div><div class="check-note">Ouviu estalidos? Secar antes de imprimir</div></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Temperatura correta para o material carregado</div><div class="check-note">Conferir a embalagem do fabricante, não apenas os padrões do slicer</div></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Bico sem resíduo externo (queimado ou vazado)</div><div class="check-note">Limpar com pano de silicone ou escova de latão aquecido</div></div>
+    </div>
+  </div>
+
+  <div class="checklist-group">
+    <div class="checklist-group-title"><span class="dot" style="background: var(--blue)"></span>Durante a Primeira Camada</div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Primeira camada bem aderida em toda a área</div><div class="check-note">Sem cantos levantando? Sem filamento espaguetando? Prosseguir.</div></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Largura da linha visível e uniforme</div><div class="check-note">Muito fina → Z alto demais. Muito larga/esmagada → Z baixo demais</div></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Sem sons de clicking no extrusor</div><div class="check-note">Click = slip = entupimento ou temperatura baixa. Parar e investigar.</div></div>
+    </div>
+  </div>
+
+  <div class="checklist-group">
+    <div class="checklist-group-title"><span class="dot" style="background: var(--green)"></span>Nas Primeiras 10–15 Camadas</div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Sem stringing nos travel moves</div><div class="check-note">Fios visíveis? Reduzir temperatura ou aumentar retração</div></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Perímetros sem gaps (sem under-extrusion)</div><div class="check-note">Gaps entre linhas → aumentar temperatura ou flow rate</div></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Sem deslocamento de camadas (layer shift)</div><div class="check-note">Degrau lateral? Parar. Verificar correia e reduzir velocidade.</div></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Superfície da peça lisa e uniforme (sem bolhas)</div><div class="check-note">Bolhas/borbulhas = filamento úmido. Secar antes da próxima.</div></div>
+    </div>
+  </div>
+
+  <div class="checklist-group">
+    <div class="checklist-group-title"><span class="dot" style="background: var(--purple)"></span>Pontos Críticos da Peça</div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Overhangs impressos sem queda de material</div><div class="check-note">Ângulos > 45°? Fan 100% e velocidade de bridge reduzida</div></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Suportes gerando bem (se aplicável)</div><div class="check-note">Suporte destacável? Boa interface? Verificar gap de suporte no slicer</div></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Top layer fechada corretamente (sem buracos)</div><div class="check-note">Buracos no topo = under-extrusion ou infill% muito baixo</div></div>
+    </div>
+  </div>
+
+  <div class="checklist-group">
+    <div class="checklist-group-title"><span class="dot" style="background: var(--accent)"></span>Manutenção Preventiva (por Bobina)</div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Cold pull realizado para limpeza do bico</div><div class="check-note">PLA: aquecer 200°C → resfria para 90°C → puxar devagar</div></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Fuso Z lubrificado (se aplicável)</div><div class="check-note">Graxa de lítio ou Superlube. Nunca WD-40 nos fusos.</div></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Correia tensionada nos eixos X e Y</div><div class="check-note">Apertar como corda de violão. Frouxa = shift. Apertada demais = desgaste.</div></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Fan do hotend funcionando corretamente</div><div class="check-note">Fan parado = heat creep = entupimento acima do bico</div></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Filamento armazenado em bag hermética c/ dessecante</div><div class="check-note">Silica gel ou dessecante de 50g por bobina. Trocar quando saturado.</div></div>
+    </div>
+  </div>
+
+  <div class="checklist-group">
+    <div class="checklist-group-title"><span class="dot" style="background: var(--teal)"></span>Pós-Impressão</div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Retirar peça após resfriamento completo (evitar warping pós-remoção)</div></div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div><div class="check-text">Registrar configurações bem-sucedidas no slicer</div><div class="check-note">Salvar perfil com material + bobina + resultado para referência futura</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ======== SECAO 5: FLUXOGRAMA ======== -->
+<div class="section" id="fluxo">
+<div class="content">
+  <div class="sec-header">
+    <span class="sec-num">05</span>
+    <span class="sec-title">Fluxograma de Decisão</span>
+  </div>
+
+  <div class="tip-box">Siga o fluxo de cima para baixo. Identifique o sintoma e chegue à solução direta.</div>
+
+  <div id="flowchart-wrap">
+  <svg class="flow-svg" viewBox="0 0 680 1460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Fluxograma de diagnóstico de defeitos em impressão 3D">
+    <title>Fluxograma de Diagnóstico FDM</title>
+    <defs>
+      <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+    </defs>
+
+    <!-- START -->
+    <rect x="215" y="20" width="250" height="44" rx="22" fill="#ff6b35" opacity="0.9"/>
+    <text x="340" y="47" text-anchor="middle" dominant-baseline="central" fill="white" font-size="14" font-weight="600" font-family="IBM Plex Sans, sans-serif">DEFEITO IDENTIFICADO</text>
+
+    <!-- Arrow down -->
+    <line x1="340" y1="64" x2="340" y2="96" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+
+    <!-- Q1: A peça soltou da mesa? -->
+    <rect x="160" y="100" width="360" height="50" rx="8" fill="none" stroke="#4a9eff" stroke-width="1" opacity="0.6"/>
+    <rect x="160" y="100" width="360" height="50" rx="8" fill="#4a9eff" opacity="0.06"/>
+    <text x="340" y="125" text-anchor="middle" dominant-baseline="central" fill="#4a9eff" font-size="13" font-weight="500" font-family="IBM Plex Sans, sans-serif">A peça soltou da mesa ou não aderiu?</text>
+
+    <!-- Yes branch: left -->
+    <line x1="200" y1="150" x2="120" y2="200" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+    <text x="140" y="175" text-anchor="middle" fill="#3ddc84" font-size="11" font-family="IBM Plex Sans, sans-serif">SIM</text>
+
+    <!-- No branch: right -->
+    <line x1="480" y1="150" x2="560" y2="200" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+    <text x="540" y="175" text-anchor="middle" fill="#ff4757" font-size="11" font-family="IBM Plex Sans, sans-serif">NÃO</text>
+
+    <!-- Left: Adesao -->
+    <rect x="40" y="204" width="170" height="70" rx="8" fill="#1e2535" stroke="#3ddc84" stroke-width="1"/>
+    <text x="125" y="224" text-anchor="middle" fill="#3ddc84" font-size="12" font-weight="500" font-family="IBM Plex Sans, sans-serif">Problema de Adesão</text>
+    <text x="125" y="242" text-anchor="middle" fill="#9ba3b8" font-size="11" font-family="IBM Plex Sans, sans-serif">→ Limpar mesa (IPA)</text>
+    <text x="125" y="258" text-anchor="middle" fill="#9ba3b8" font-size="11" font-family="IBM Plex Sans, sans-serif">→ ↑ Temp mesa / Brim</text>
+
+    <!-- Right: continua -->
+    <rect x="470" y="204" width="170" height="50" rx="8" fill="#1e2535" stroke="#9ba3b8" stroke-width="0.5"/>
+    <text x="555" y="228" text-anchor="middle" dominant-baseline="central" fill="#e8eaf0" font-size="12" font-family="IBM Plex Sans, sans-serif">Continua imprimindo</text>
+
+    <!-- Arrow from right to Q2 -->
+    <line x1="555" y1="254" x2="555" y2="285" stroke="#9ba3b8" stroke-width="1"/>
+    <line x1="555" y1="285" x2="420" y2="285" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+
+    <!-- Q2: Fios entre peças? -->
+    <rect x="160" y="289" width="360" height="50" rx="8" fill="none" stroke="#4a9eff" stroke-width="1" opacity="0.6"/>
+    <rect x="160" y="289" width="360" height="50" rx="8" fill="#4a9eff" opacity="0.06"/>
+    <text x="340" y="314" text-anchor="middle" dominant-baseline="central" fill="#4a9eff" font-size="13" font-weight="500" font-family="IBM Plex Sans, sans-serif">Fios (stringing) entre partes?</text>
+
+    <line x1="220" y1="339" x2="140" y2="390" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+    <text x="158" y="368" text-anchor="middle" fill="#3ddc84" font-size="11" font-family="IBM Plex Sans, sans-serif">SIM</text>
+
+    <line x1="460" y1="339" x2="560" y2="390" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+    <text x="527" y="368" text-anchor="middle" fill="#ff4757" font-size="11" font-family="IBM Plex Sans, sans-serif">NÃO</text>
+
+    <!-- Stringing fix -->
+    <rect x="40" y="394" width="190" height="80" rx="8" fill="#1e2535" stroke="#ffd166" stroke-width="1"/>
+    <text x="135" y="414" text-anchor="middle" fill="#ffd166" font-size="12" font-weight="500" font-family="IBM Plex Sans, sans-serif">Stringing</text>
+    <text x="135" y="432" text-anchor="middle" fill="#9ba3b8" font-size="11" font-family="IBM Plex Sans, sans-serif">→ ↓ Temperatura 5–10°C</text>
+    <text x="135" y="449" text-anchor="middle" fill="#9ba3b8" font-size="11" font-family="IBM Plex Sans, sans-serif">→ ↑ Retração 0.5–1mm</text>
+    <text x="135" y="466" text-anchor="middle" fill="#9ba3b8" font-size="11" font-family="IBM Plex Sans, sans-serif">→ ↑ Velocidade travel</text>
+
+    <!-- right side continues -->
+    <rect x="460" y="394" width="170" height="40" rx="8" fill="#1e2535" stroke="#9ba3b8" stroke-width="0.5"/>
+    <text x="545" y="414" text-anchor="middle" dominant-baseline="central" fill="#e8eaf0" font-size="12" font-family="IBM Plex Sans, sans-serif">Continua</text>
+
+    <line x1="545" y1="434" x2="545" y2="464" stroke="#9ba3b8" stroke-width="1"/>
+    <line x1="545" y1="464" x2="420" y2="464" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+
+    <!-- Q3: Camadas separando? -->
+    <rect x="160" y="468" width="360" height="50" rx="8" fill="none" stroke="#4a9eff" stroke-width="1" opacity="0.6"/>
+    <rect x="160" y="468" width="360" height="50" rx="8" fill="#4a9eff" opacity="0.06"/>
+    <text x="340" y="493" text-anchor="middle" dominant-baseline="central" fill="#4a9eff" font-size="13" font-weight="500" font-family="IBM Plex Sans, sans-serif">Camadas se separando ou gaps?</text>
+
+    <line x1="220" y1="518" x2="140" y2="568" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+    <text x="158" y="546" text-anchor="middle" fill="#3ddc84" font-size="11" font-family="IBM Plex Sans, sans-serif">SIM</text>
+
+    <line x1="460" y1="518" x2="560" y2="568" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+    <text x="527" y="546" text-anchor="middle" fill="#ff4757" font-size="11" font-family="IBM Plex Sans, sans-serif">NÃO</text>
+
+    <!-- Layer sep fix -->
+    <rect x="40" y="572" width="190" height="70" rx="8" fill="#1e2535" stroke="#ff4757" stroke-width="1"/>
+    <text x="135" y="592" text-anchor="middle" fill="#ff4757" font-size="12" font-weight="500" font-family="IBM Plex Sans, sans-serif">Delamination</text>
+    <text x="135" y="610" text-anchor="middle" fill="#9ba3b8" font-size="11" font-family="IBM Plex Sans, sans-serif">→ ↑ Temperatura 10°C</text>
+    <text x="135" y="627" text-anchor="middle" fill="#9ba3b8" font-size="11" font-family="IBM Plex Sans, sans-serif">→ Layer height ≤ 75% bico</text>
+
+    <rect x="460" y="572" width="170" height="40" rx="8" fill="#1e2535" stroke="#9ba3b8" stroke-width="0.5"/>
+    <text x="545" y="592" text-anchor="middle" dominant-baseline="central" fill="#e8eaf0" font-size="12" font-family="IBM Plex Sans, sans-serif">Continua</text>
+
+    <line x1="545" y1="612" x2="545" y2="642" stroke="#9ba3b8" stroke-width="1"/>
+    <line x1="545" y1="642" x2="420" y2="642" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+
+    <!-- Q4: Layer shifting? -->
+    <rect x="160" y="646" width="360" height="50" rx="8" fill="none" stroke="#4a9eff" stroke-width="1" opacity="0.6"/>
+    <rect x="160" y="646" width="360" height="50" rx="8" fill="#4a9eff" opacity="0.06"/>
+    <text x="340" y="671" text-anchor="middle" dominant-baseline="central" fill="#4a9eff" font-size="13" font-weight="500" font-family="IBM Plex Sans, sans-serif">Camadas deslocadas horizontalmente?</text>
+
+    <line x1="220" y1="696" x2="140" y2="746" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+    <text x="158" y="724" text-anchor="middle" fill="#3ddc84" font-size="11" font-family="IBM Plex Sans, sans-serif">SIM</text>
+
+    <line x1="460" y1="696" x2="560" y2="746" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+    <text x="527" y="724" text-anchor="middle" fill="#ff4757" font-size="11" font-family="IBM Plex Sans, sans-serif">NÃO</text>
+
+    <!-- Shift fix -->
+    <rect x="40" y="750" width="190" height="70" rx="8" fill="#1e2535" stroke="#a78bfa" stroke-width="1"/>
+    <text x="135" y="770" text-anchor="middle" fill="#a78bfa" font-size="12" font-weight="500" font-family="IBM Plex Sans, sans-serif">Layer Shifting</text>
+    <text x="135" y="788" text-anchor="middle" fill="#9ba3b8" font-size="11" font-family="IBM Plex Sans, sans-serif">→ Tensionar correias</text>
+    <text x="135" y="805" text-anchor="middle" fill="#9ba3b8" font-size="11" font-family="IBM Plex Sans, sans-serif">→ ↓ Velocidade 20–30%</text>
+
+    <rect x="460" y="750" width="170" height="40" rx="8" fill="#1e2535" stroke="#9ba3b8" stroke-width="0.5"/>
+    <text x="545" y="770" text-anchor="middle" dominant-baseline="central" fill="#e8eaf0" font-size="12" font-family="IBM Plex Sans, sans-serif">Continua</text>
+
+    <line x1="545" y1="790" x2="545" y2="820" stroke="#9ba3b8" stroke-width="1"/>
+    <line x1="545" y1="820" x2="420" y2="820" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+
+    <!-- Q5: Ondulações? -->
+    <rect x="160" y="824" width="360" height="50" rx="8" fill="none" stroke="#4a9eff" stroke-width="1" opacity="0.6"/>
+    <rect x="160" y="824" width="360" height="50" rx="8" fill="#4a9eff" opacity="0.06"/>
+    <text x="340" y="849" text-anchor="middle" dominant-baseline="central" fill="#4a9eff" font-size="13" font-weight="500" font-family="IBM Plex Sans, sans-serif">Ondulações / eco nos cantos (ringing)?</text>
+
+    <line x1="220" y1="874" x2="140" y2="924" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+    <text x="158" y="902" text-anchor="middle" fill="#3ddc84" font-size="11" font-family="IBM Plex Sans, sans-serif">SIM</text>
+
+    <line x1="460" y1="874" x2="560" y2="924" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+    <text x="527" y="902" text-anchor="middle" fill="#ff4757" font-size="11" font-family="IBM Plex Sans, sans-serif">NÃO</text>
+
+    <!-- Ringing fix -->
+    <rect x="40" y="928" width="190" height="70" rx="8" fill="#1e2535" stroke="#2dd4bf" stroke-width="1"/>
+    <text x="135" y="948" text-anchor="middle" fill="#2dd4bf" font-size="12" font-weight="500" font-family="IBM Plex Sans, sans-serif">Ringing / Ghosting</text>
+    <text x="135" y="966" text-anchor="middle" fill="#9ba3b8" font-size="11" font-family="IBM Plex Sans, sans-serif">→ ↓ Velocidade 40–60mm/s</text>
+    <text x="135" y="983" text-anchor="middle" fill="#9ba3b8" font-size="11" font-family="IBM Plex Sans, sans-serif">→ Usar Input Shaping</text>
+
+    <rect x="460" y="928" width="170" height="40" rx="8" fill="#1e2535" stroke="#9ba3b8" stroke-width="0.5"/>
+    <text x="545" y="948" text-anchor="middle" dominant-baseline="central" fill="#e8eaf0" font-size="12" font-family="IBM Plex Sans, sans-serif">Continua</text>
+
+    <line x1="545" y1="968" x2="545" y2="998" stroke="#9ba3b8" stroke-width="1"/>
+    <line x1="545" y1="998" x2="420" y2="998" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+
+    <!-- Q6: Estalidos? -->
+    <rect x="160" y="1002" width="360" height="50" rx="8" fill="none" stroke="#4a9eff" stroke-width="1" opacity="0.6"/>
+    <rect x="160" y="1002" width="360" height="50" rx="8" fill="#4a9eff" opacity="0.06"/>
+    <text x="340" y="1027" text-anchor="middle" dominant-baseline="central" fill="#4a9eff" font-size="13" font-weight="500" font-family="IBM Plex Sans, sans-serif">Estalidos / bolhas na extrusão?</text>
+
+    <line x1="220" y1="1052" x2="140" y2="1102" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+    <text x="158" y="1080" text-anchor="middle" fill="#3ddc84" font-size="11" font-family="IBM Plex Sans, sans-serif">SIM</text>
+
+    <line x1="460" y1="1052" x2="560" y2="1102" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+    <text x="527" y="1080" text-anchor="middle" fill="#ff4757" font-size="11" font-family="IBM Plex Sans, sans-serif">NÃO</text>
+
+    <!-- Umidade fix -->
+    <rect x="40" y="1106" width="190" height="70" rx="8" fill="#1e2535" stroke="#ffd166" stroke-width="1"/>
+    <text x="135" y="1126" text-anchor="middle" fill="#ffd166" font-size="12" font-weight="500" font-family="IBM Plex Sans, sans-serif">Filamento Úmido</text>
+    <text x="135" y="1144" text-anchor="middle" fill="#9ba3b8" font-size="11" font-family="IBM Plex Sans, sans-serif">→ Secar na faixa do material</text>
+    <text x="135" y="1161" text-anchor="middle" fill="#9ba3b8" font-size="11" font-family="IBM Plex Sans, sans-serif">→ Armazenar em bag s/ dessec.</text>
+
+    <rect x="460" y="1106" width="170" height="40" rx="8" fill="#1e2535" stroke="#9ba3b8" stroke-width="0.5"/>
+    <text x="545" y="1126" text-anchor="middle" dominant-baseline="central" fill="#e8eaf0" font-size="12" font-family="IBM Plex Sans, sans-serif">Continua</text>
+
+    <line x1="545" y1="1146" x2="545" y2="1176" stroke="#9ba3b8" stroke-width="1"/>
+    <line x1="545" y1="1176" x2="420" y2="1176" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+
+    <!-- Q7: Extrusão parou? -->
+    <rect x="160" y="1180" width="360" height="50" rx="8" fill="none" stroke="#4a9eff" stroke-width="1" opacity="0.6"/>
+    <rect x="160" y="1180" width="360" height="50" rx="8" fill="#4a9eff" opacity="0.06"/>
+    <text x="340" y="1205" text-anchor="middle" dominant-baseline="central" fill="#4a9eff" font-size="13" font-weight="500" font-family="IBM Plex Sans, sans-serif">Extrusão parou ou clicking no extrusor?</text>
+
+    <line x1="260" y1="1230" x2="200" y2="1280" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+    <text x="215" y="1258" text-anchor="middle" fill="#3ddc84" font-size="11" font-family="IBM Plex Sans, sans-serif">SIM</text>
+
+    <line x1="420" y1="1230" x2="480" y2="1280" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+    <text x="463" y="1258" text-anchor="middle" fill="#ff4757" font-size="11" font-family="IBM Plex Sans, sans-serif">NÃO</text>
+
+    <!-- Clog -->
+    <rect x="90" y="1284" width="220" height="80" rx="8" fill="#1e2535" stroke="#ff4757" stroke-width="1.5"/>
+    <text x="200" y="1304" text-anchor="middle" fill="#ff4757" font-size="12" font-weight="600" font-family="IBM Plex Sans, sans-serif">⚠ Entupimento (Clog)</text>
+    <text x="200" y="1322" text-anchor="middle" fill="#9ba3b8" font-size="11" font-family="IBM Plex Sans, sans-serif">→ Cold pull imediato</text>
+    <text x="200" y="1338" text-anchor="middle" fill="#9ba3b8" font-size="11" font-family="IBM Plex Sans, sans-serif">→ Verificar PTFE interno</text>
+    <text x="200" y="1355" text-anchor="middle" fill="#9ba3b8" font-size="11" font-family="IBM Plex Sans, sans-serif">→ ↑ Temp 5°C</text>
+
+    <!-- Defeito raro -->
+    <rect x="370" y="1284" width="220" height="80" rx="8" fill="#1e2535" stroke="#9ba3b8" stroke-width="1"/>
+    <text x="480" y="1304" text-anchor="middle" fill="#e8eaf0" font-size="12" font-weight="500" font-family="IBM Plex Sans, sans-serif">Defeito menos comum</text>
+    <text x="480" y="1322" text-anchor="middle" fill="#9ba3b8" font-size="11" font-family="IBM Plex Sans, sans-serif">→ Verificar seção 02</text>
+    <text x="480" y="1338" text-anchor="middle" fill="#9ba3b8" font-size="11" font-family="IBM Plex Sans, sans-serif">→ Postar foto no fórum</text>
+    <text x="480" y="1355" text-anchor="middle" fill="#9ba3b8" font-size="11" font-family="IBM Plex Sans, sans-serif">→ Cheio de variáveis</text>
+
+    <!-- Arrow down from main -->
+    <line x1="340" y1="64" x2="340" y2="96" stroke="#9ba3b8" stroke-width="1" marker-end="url(#arr)"/>
+
+  </svg>
+  </div>
+
+  <div class="warn-box" style="margin-top: 20px;">
+    <strong>Lembre-se:</strong> Sempre mude UMA variável por vez. Se mudar temperatura, velocidade e retração ao mesmo tempo, não saberá o que resolveu o problema. Imprima um cubo de teste (2cm × 2cm × 2cm) a cada ajuste.
+  </div>
+</div>
+</div>
+
+<!-- ======== SECAO 6: DIAGNOSTICO RAPIDO ======== -->
+<div class="section" id="qdiag">
+<div class="content">
+  <div class="sec-header">
+    <span class="sec-num">⚡</span>
+    <span class="sec-title">Diagnóstico Rápido</span>
+  </div>
+  <div class="tip-box">Responda as perguntas sobre o sintoma da sua impressão. O wizard identifica o defeito e entrega o plano de correção.</div>
+
+  <div class="qd-shell">
+    <div class="qd-progress-track"><div class="qd-progress-fill" id="qd-progress" style="width:0%"></div></div>
+    <div class="qd-body" id="qd-body"></div>
+  </div>
+</div>
+</div>
+
+<script>
+// ===================== SECTION ROUTING =====================
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const tabs = document.querySelectorAll('.nav-tab');
+  const map = { diag: 0, causas: 1, valores: 2, checklist: 3, fluxo: 4, qdiag: 5 };
+  if (map[id] !== undefined) tabs[map[id]].classList.add('active');
+  if (id === 'qdiag') renderQDStep();
+}
+
+function toggleCard(card) { card.classList.toggle('expanded'); }
+
+function toggleCheck(item) { item.classList.toggle('checked'); updateProgress(); }
+
+function updateProgress() {
+  const total = document.querySelectorAll('.check-item').length;
+  const done = document.querySelectorAll('.check-item.checked').length;
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = done + ' de ' + total + ' itens verificados (' + pct + '%)';
+}
+
+function resetChecklist() {
+  document.querySelectorAll('.check-item').forEach(i => i.classList.remove('checked'));
+  updateProgress();
+}
+
+// ===================== SEARCH ENGINE =====================
+const SEARCH_DB = [
+  { icon:'🕸️', name:'Stringing / Fios', section:'Diagnóstico Visual', tags:'stringing fio filamento babando temperatura retração travel moves',
+    fixes:['↓ Temperatura 5–10°C (ex: 215°C → 205°C)','↑ Retração: Direct Drive 0.5–2mm | Bowden 4–7mm','Ativar "Avoid crossing perimeters" no slicer','↑ Velocidade de travel (150–200mm/s)'] },
+  { icon:'🔴', name:'Over-extrusion / Blobs', section:'Diagnóstico Visual', tags:'blob bolinha gota superfície irregular over extrusion fluxo flow',
+    fixes:['↓ Flow rate para 95–98%','↓ Temperatura 5°C','Ativar Coasting e Wipe no slicer'] },
+  { icon:'⬜', name:'Under-extrusion', section:'Diagnóstico Visual', tags:'under extrusion gap buraco linha fina fraca camada',
+    fixes:['Cold pull para limpar o bico','↑ Temperatura 5–10°C','↑ Flow rate para 105%','Verificar diâmetro do filamento com paquímetro'] },
+  { icon:'🚫', name:'Entupimento / Clog', section:'Diagnóstico Visual', tags:'entupimento clog bico clicking extrusor para grinding',
+    fixes:['Cold pull imediato: aquecer 200°C, resfriar 90°C (PLA), puxar devagar','Verificar PTFE interno do hotend','↑ Temperatura 5°C e tentar extrudar manualmente','Substituir bico se persistir'] },
+  { icon:'📐', name:'Warping / Empenamento', section:'Diagnóstico Visual', tags:'warping empenamento canto levantado mesa fria ABS',
+    fixes:['Limpar mesa com IPA 70% antes de cada impressão','Adicionar Brim de 5–10mm','↑ Temperatura da mesa (ABS: 100–110°C)','Usar enclosure fechado para ABS/ASA/Nylon'] },
+  { icon:'🏔️', name:'Elephant Foot', section:'Diagnóstico Visual', tags:'elephant foot base larga esmagada primeira camada z offset',
+    fixes:['↑ Z offset em 0.02–0.05mm incrementalmente','↓ Temperatura da mesa 5°C','↓ Flow da primeira camada para 90%'] },
+  { icon:'🌊', name:'Layer Shifting', section:'Diagnóstico Visual', tags:'layer shift camada deslocada degrau correia eixo x y velocidade',
+    fixes:['Tensionar correias GT2 (tensão de violão)','↓ Velocidade geral 20–30%','Verificar corrente dos drivers de motor','Verificar parafusos de aperto das polias'] },
+  { icon:'🌀', name:'Ringing / Ghosting', section:'Diagnóstico Visual', tags:'ringing ghosting ondulação eco canto vibração velocidade',
+    fixes:['↓ Velocidade para 40–60mm/s','Ativar Input Shaping (Klipper) ou Resonance Compensation (Marlin)','Apertar parafusos do frame','Verificar rolamentos e guias'] },
+  { icon:'📉', name:'Layer Separation / Delamination', section:'Diagnóstico Visual', tags:'delamination layer separation camada separando fraca',
+    fixes:['↑ Temperatura de impressão 10–15°C','Layer height ≤ 75% do diâmetro do bico','Aumentar número de perímetros','Secar o filamento se usar Nylon/PETG'] },
+  { icon:'🔺', name:'Overhangs com Falha', section:'Diagnóstico Visual', tags:'overhang volanço ponte bridge suporte queda material',
+    fixes:['Fan 100% para resfriamento rápido','↓ Bridge speed para 20–30mm/s','Adicionar suportes para ângulos > 45°','Reorientar a peça no slicer'] },
+  { icon:'💧', name:'Filamento Úmido', section:'Diagnóstico Visual', tags:'filamento umido estalido bolha pop nylon petg tpu pva',
+    fixes:['Secar PLA: 50–55°C por 4–6h','Secar PETG: 65–70°C por 6–8h','Secar Nylon: 80–90°C por 12–24h','Armazenar em bag hermética com dessecante de sílica'] },
+  { icon:'📏', name:'Layer Height errado', section:'Valores de Ajuste', tags:'layer height altura camada bico 0.4 0.2 resolução',
+    fixes:['Bico 0.4mm: layer height 0.05–0.30mm','Nunca exceder 75% do diâmetro do bico','Primeira camada: 0.2–0.3mm para boa adesão'] },
+  { icon:'🌡️', name:'Temperatura incorreta por material', section:'Valores de Ajuste', tags:'temperatura material pla petg abs nylon tpu asa',
+    fixes:['PLA: 195–215°C / mesa 50–60°C','PETG: 230–245°C / mesa 70–85°C','ABS/ASA: 230–260°C / mesa 100–110°C','Nylon: 240–270°C / mesa 70–90°C','TPU: 220–240°C / mesa 30–60°C'] },
+  { icon:'🔄', name:'Retração mal calibrada', section:'Valores de Ajuste', tags:'retração retraction direct drive bowden distância velocidade',
+    fixes:['Direct Drive: 0.5–2mm a 25–45mm/s','Bowden curto (<40cm): 3–5mm a 40–60mm/s','Bowden longo (>40cm): 5–7mm a 45–65mm/s','PETG: reduzir 30–40% vs PLA'] },
+];
+
+function highlight(text, q) {
+  if (!q) return text;
+  const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+  return text.replace(re, '<mark>$1</mark>');
+}
+
+function runSearch(query) {
+  const q = query.trim().toLowerCase();
+  if (!q) { closeSearch(); return; }
+  showSearchOverlay();
+  const results = SEARCH_DB.filter(item =>
+    (item.name + ' ' + item.tags + ' ' + item.fixes.join(' ')).toLowerCase().includes(q)
+  );
+  const list = document.getElementById('search-results-list');
+  const label = document.getElementById('search-count-label');
+  label.textContent = results.length + ' resultado' + (results.length !== 1 ? 's' : '') + ' para "' + query.trim() + '"';
+  if (!results.length) {
+    list.innerHTML = '<div class="search-empty">Nenhum defeito encontrado. Tente termos como: stringing, clog, warping, layer shift.</div>';
+    return;
+  }
+  list.innerHTML = results.map(r => `
+    <div class="search-result-item" onclick="goToDefect('${r.name.replace(/'/g,"\\'")}')">
+      <span class="sr-icon">${r.icon}</span>
+      <div>
+        <div class="sr-name">${highlight(r.name, query.trim())}</div>
+        <div class="sr-snippet">${highlight(r.fixes[0], query.trim())} ${r.fixes.length > 1 ? `<em>+ ${r.fixes.length-1} ajuste(s)</em>` : ''}</div>
+        <span class="sr-section">${r.section}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showSearchOverlay() { document.getElementById('search-results-overlay').classList.add('visible'); }
+function closeSearch() {
+  document.getElementById('search-results-overlay').classList.remove('visible');
+}
+function closeSearchIfOutside(e) {
+  if (e.target === document.getElementById('search-results-overlay')) closeSearch();
+}
+
+function goToDefect(name) {
+  closeSearch();
+  document.getElementById('global-search').value = '';
+  showSection('qdiag');
+  // find in DB and show result directly
+  const item = SEARCH_DB.find(r => r.name === name);
+  if (item) renderQDResult(item);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeSearch();
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); document.getElementById('global-search').focus(); }
+});
+
+// ===================== QUICK DIAGNOSIS WIZARD =====================
+const QD_TREE = {
+  id: 'root',
+  q: 'O que está acontecendo com a sua impressão?',
+  hint: 'Escolha o sintoma mais parecido com o que você está vendo agora.',
+  opts: [
+    {
+      icon: '🕸️', label: 'Fios ou "babados"', desc: 'Material fino entre partes separadas',
+      next: {
+        id: 'string1', q: 'Os fios aparecem em todas as áreas ou só em viagens longas?', hint: 'Observe os travel moves no ar.',
+        opts: [
+          { icon: '🌐', label: 'Em todo lugar', desc: 'Até em peças próximas',
+            next: { result: { name:'Stringing Severo', icon:'🕸️', desc:'Temperatura muito alta ou retração muito pequena.',
+              fixes:['↓ Temperatura 10–15°C incrementalmente','↑ Retração: Direct Drive 2mm | Bowden 6mm','Ativar "Avoid Crossing Perimeters"','Verificar se filamento está úmido (estalidos = sim)'] } }
+          },
+          { icon: '↔️', label: 'Só em viagens longas', desc: 'Distâncias maiores que 5cm',
+            next: { result: { name:'Stringing Moderado', icon:'🕸️', desc:'Retração ajustada mas temperatura ligeiramente alta.',
+              fixes:['↓ Temperatura 5°C','↑ Velocidade de travel para 200mm/s','Ativar Combing Mode no slicer','Testar torre de retração (retraction tower)'] } }
+          }
+        ]
+      }
+    },
+    {
+      icon: '📉', label: 'Camadas separando / buracos', desc: 'Gaps horizontais, peça fraca',
+      next: {
+        id: 'under1', q: 'Os buracos estão em toda a peça ou só no topo?', hint: 'Observe as paredes e o preenchimento interno.',
+        opts: [
+          { icon: '🔳', label: 'Em toda a peça', desc: 'Paredes e infill também',
+            next: {
+              id: 'under2', q: 'Você ouve cliques no extrusor durante a impressão?', hint: 'Som de "click-click" = extrusor patinando.',
+              opts: [
+                { icon: '🔊', label: 'Sim, há cliques', desc: 'Som intermitente de clicking',
+                  next: { result: { name:'Entupimento (Clog)', icon:'🚫', desc:'O extrusor está patinando — bico parcialmente entupido.',
+                    fixes:['PARAR a impressão imediatamente','Cold Pull: aquecer 200°C → resfriar 90°C → puxar com força','↑ Temperatura 5°C e tentar extrudar manualmente','Substituir bico se persistir'] } }
+                },
+                { icon: '🔇', label: 'Sem cliques', desc: 'Impressão silenciosa',
+                  next: { result: { name:'Under-extrusion', icon:'⬜', desc:'Fluxo insuficiente — temperatura baixa ou bico parcialmente obstruído.',
+                    fixes:['↑ Temperatura 5–10°C (PLA: tentar 210°C)','↑ Flow Rate para 105–110% no slicer','Medir diâmetro do filamento com paquímetro','Cold pull preventivo e verificar engrenagem do extrusor'] } }
+                }
+              ]
+            }
+          },
+          { icon: '🔝', label: 'Só no topo / top layer', desc: 'Tampa da peça com buracos',
+            next: { result: { name:'Top Layer com Gaps', icon:'📉', desc:'Infill insuficiente para suportar as camadas superiores.',
+              fixes:['↑ Número de top layers (mín. 4–5 camadas)','↑ Infill % (mín. 20% para partes funcionais)','↑ Flow Rate da top layer para 105%','Verificar se não é under-extrusion geral'] } }
+          }
+        ]
+      }
+    },
+    {
+      icon: '🌊', label: 'Peça deslocada / "torta"', desc: 'Camadas deslocadas horizontalmente',
+      next: {
+        id: 'shift1', q: 'O deslocamento acontece de forma repentina ou gradual?', hint: 'Observe a altura onde começa o problema.',
+        opts: [
+          { icon: '⚡', label: 'Repentino (degrau)', desc: 'Uma camada deslocada de golpe',
+            next: { result: { name:'Layer Shifting', icon:'🌊', desc:'Motor de passo perdeu passos — correia solta ou velocidade alta.',
+              fixes:['Verificar e tensionar correias GT2 em X e Y','↓ Velocidade geral 20–30%','Verificar aperto dos parafusos das polias','Verificar corrente dos drivers (Vref)'] } }
+          },
+          { icon: '📈', label: 'Gradual (inclinado)', desc: 'Peça vai deslocando aos poucos',
+            next: { result: { name:'Z Wobble / Drift', icon:'🌀', desc:'Fuso Z desalinhado ou correia Z com folga.',
+              fixes:['Verificar alinhamento do fuso Z (olhar de frente: reto?)','Verificar coupler (acoplador) do fuso — aperto e alinhamento','Para Ender-style: desapertar coupler, nivelar cama, reapertar','Lubrificar fuso com graxa de lítio'] } }
+          }
+        ]
+      }
+    },
+    {
+      icon: '📐', label: 'Peça soltou da mesa', desc: 'Warping, cantos levantados',
+      next: {
+        id: 'warp1', q: 'Qual material você está imprimindo?', hint: 'Cada material tem comportamento diferente.',
+        opts: [
+          { icon: '🟢', label: 'PLA', desc: 'Filamento mais comum',
+            next: { result: { name:'Warping em PLA', icon:'📐', desc:'PLA raramente levanta se a mesa estiver limpa e nivelada.',
+              fixes:['Limpar mesa com IPA 70% (gordura de dedos = sem adesão)','Mesa: 55–60°C','Verificar Z offset (primeira camada esmagada = boa adesão)','Adicionar Brim de 5mm se peça for grande'] } }
+          },
+          { icon: '🟠', label: 'PETG', desc: 'Filamento flexível/resistente',
+            next: { result: { name:'Warping em PETG', icon:'📐', desc:'PETG adere bem mas pode grudar demais ou levantar sem enclosure.',
+              fixes:['Mesa: 75–85°C com superfície PEI ou vidro + cola batom','Evitar fan na primeira camada (0%)','Se grudar forte: baixar temp da mesa 5°C','Brim de 3–5mm para peças longas'] } }
+          },
+          { icon: '🔴', label: 'ABS / ASA / Nylon', desc: 'Materiais de engenharia',
+            next: { result: { name:'Warping em ABS/ASA/Nylon', icon:'📐', desc:'Contração térmica severa — enclosure é quase obrigatório.',
+              fixes:['OBRIGATÓRIO: enclosure fechado (temperatura ambiente ~45°C)','Mesa: 100–110°C (ABS) | 90–110°C (ASA)','Brim largo: 8–15mm','Secar filamento antes (especialmente Nylon)','Desativar fan de layer ou limitar a 20%'] } }
+          }
+        ]
+      }
+    },
+    {
+      icon: '🌀', label: 'Ondulações / eco nos cantos', desc: 'Ringing, ghosting nas superfícies',
+      next: { result: { name:'Ringing / Ghosting', icon:'🌀', desc:'Vibração mecânica durante mudanças de direção rápidas.',
+        fixes:['↓ Velocidade de impressão para 40–50mm/s','↓ Aceleração para 1500–2000 mm/s²','Ativar Input Shaping no Klipper ou Resonance Compensation no Marlin','Verificar aperto de todos os parafusos do frame','Usar PETG/ABS (mais amortecimento) ao invés de PLA para testes'] } }
+    },
+    {
+      icon: '💧', label: 'Estalidos / bolhas / material queimado', desc: 'Sons pop-pop, superfície irregular',
+      next: {
+        id: 'moist1', q: 'Os estalidos acontecem durante toda a impressão?', hint: 'Água no filamento vira vapor no hotend.',
+        opts: [
+          { icon: '🔊', label: 'Sim, o tempo todo', desc: 'Pop-pop constante',
+            next: { result: { name:'Filamento Úmido (Severo)', icon:'💧', desc:'Filamento absorveu muita umidade — secagem urgente.',
+              fixes:['PARAR e secar o filamento AGORA','PLA: 50°C por 6h | PETG: 65°C por 8h | Nylon: 80°C por 12–24h','Usar food dehydrator, estufa ou impressora com cama aquecida','Armazenar em bag hermética com dessecante de sílica gel','Testar: extrudar em vazio — se estalir = úmido'] } }
+          },
+          { icon: '🔈', label: 'Ocasional / início', desc: 'Só nas primeiras camadas',
+            next: { result: { name:'Filamento Levemente Úmido', icon:'💧', desc:'Umidade leve — secagem preventiva resolve.',
+              fixes:['Secar por 4h na temperatura do material','Usar dry box durante a impressão','Se for PETG: ↑ temperatura 5°C para compensar','Verificar se a bobina está aberta há mais de 1 semana sem proteção'] } }
+          }
+        ]
+      }
+    },
+    {
+      icon: '🏔️', label: 'Base da peça muito larga', desc: 'Elephant foot, base esmagada',
+      next: { result: { name:'Elephant Foot', icon:'🏔️', desc:'Primeira(s) camada(s) esmagadas por Z offset baixo ou mesa quente demais.',
+        fixes:['↑ Z offset em +0.05mm (subir o bico)', 'Mesa: ↓ 5°C (ex: 60°C → 55°C para PLA)','↓ Flow da primeira camada para 90%','Verificar nivelamento da mesa — área central vs bordas'] } }
+    }
+  ]
+};
+
+let qdHistory = [];
+let qdCurrent = null;
+
+function renderQDStep(node) {
+  if (!node) {
+    if (qdHistory.length === 0) { qdCurrent = QD_TREE; } else { qdCurrent = qdHistory[qdHistory.length-1]; }
+    node = qdCurrent;
+  }
+  const totalSteps = 4;
+  const pct = Math.min(Math.round((qdHistory.length / totalSteps) * 100), 90);
+  document.getElementById('qd-progress').style.width = pct + '%';
+
+  if (node.result) {
+    renderQDResult(node.result);
+    return;
+  }
+
+  const body = document.getElementById('qd-body');
+  const stepNum = qdHistory.length + 1;
+
+  let optsHTML = node.opts.map((opt, i) => `
+    <button class="qd-opt" onclick="qdChoose(${i})">
+      <span class="qd-opt-icon">${opt.icon}</span>
+      <div>
+        <div class="qd-opt-label">${opt.label}</div>
+        <div class="qd-opt-desc">${opt.desc}</div>
+      </div>
+    </button>
+  `).join('');
+
+  body.innerHTML = `
+    <div class="qd-step-counter">Pergunta ${stepNum} ${qdHistory.length > 0 ? '· <span style="cursor:pointer;color:var(--accent2)" onclick="qdBack()">← Voltar</span>' : ''}</div>
+    <div class="qd-question">${node.q}</div>
+    <div class="qd-hint">${node.hint}</div>
+    <div class="qd-options">${optsHTML}</div>
+  `;
+}
+
+function qdChoose(idx) {
+  const node = qdHistory.length === 0 ? QD_TREE : qdCurrent;
+  const chosen = node.opts[idx];
+  qdHistory.push(node);
+  qdCurrent = chosen.next;
+  renderQDStep(chosen.next);
+}
+
+function qdBack() {
+  if (qdHistory.length === 0) return;
+  qdCurrent = qdHistory.pop();
+  renderQDStep(qdCurrent);
+}
+
+function renderQDResult(result) {
+  document.getElementById('qd-progress').style.width = '100%';
+  const fixesHTML = result.fixes.map((f, i) => `
+    <li><span class="qd-fix-num">FIX ${i+1}</span><span>${f}</span></li>
+  `).join('');
+  document.getElementById('qd-body').innerHTML = `
+    <div class="qd-step-counter">Diagnóstico concluído ✓</div>
+    <div class="qd-result">
+      <div class="qd-result-title">${result.icon} ${result.name}</div>
+      <div class="qd-result-desc">${result.desc}</div>
+      <ul class="qd-fix-list">${fixesHTML}</ul>
+    </div>
+    <button class="qd-restart" onclick="qdRestart()">↺ Novo Diagnóstico</button>
+  `;
+}
+
+function qdRestart() {
+  qdHistory = [];
+  qdCurrent = QD_TREE;
+  document.getElementById('qd-progress').style.width = '0%';
+  renderQDStep(QD_TREE);
+}
+
+// Init wizard on load
+renderQDStep(QD_TREE);
+</script>
+</body>
+</html>
